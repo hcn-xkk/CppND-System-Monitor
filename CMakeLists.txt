@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(monitor)
+set( CMAKE_INCLUDE_PATH "/usr/include")
+set( CMAKE_LIBRARY_PATH "/lib/x86_64-linux-gnu/libncurses.so.5")
 
 find_package(Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIRS})

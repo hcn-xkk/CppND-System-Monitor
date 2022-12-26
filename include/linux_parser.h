@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <regex>
+#include <stdexcept>
 #include <string>
 
 namespace LinuxParser {
