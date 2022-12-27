@@ -20,7 +20,6 @@ float Process::CpuUtilization() const {
   string key;
   string value;
   std::vector<string> values;
-  int i = 0;
   if (filestream.is_open()) {
     while (std::getline(filestream, line, ' ')) {
       if (!line.empty() && values.size() < 22) {
@@ -28,11 +27,12 @@ float Process::CpuUtilization() const {
       }
     }
   }
+  filestream.close();
+
   if (values.empty()) {
     failed_ = true;
     return 0.0;
   }
-
   float total_time = std::stol(values[13]) + std::stol(values[14]) +
                      std::stol(values[15]) + std::stol(values[16]);
   // Another equation. But with this one sometimes ratio > 1?
@@ -56,7 +56,9 @@ string Process::Ram() const {
 
 string Process::User() const { return LinuxParser::User(pid_); }
 
-long int Process::UpTime() const { return LinuxParser::UpTime(pid_); }
+long int Process::UpTime() const {
+  return LinuxParser::UpTime(pid_, system_uptime_);
+}
 
 bool Process::operator<(Process const& a) const {
   return CpuUtilization() > a.CpuUtilization();

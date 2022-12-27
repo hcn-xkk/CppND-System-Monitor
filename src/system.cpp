@@ -18,8 +18,7 @@ std::vector<Process>& System::Processes() {
   processes_.clear();
   vector<int> pid_nums = LinuxParser::Pids();
   for (auto num : pid_nums) {
-    auto p = Process(num, UpTime());
-    processes_.emplace_back(p);
+    processes_.emplace_back(num, UpTime());
   }
   // sort processes_
   std::sort(processes_.begin(), processes_.end());
