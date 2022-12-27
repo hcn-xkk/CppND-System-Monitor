@@ -11,7 +11,7 @@
 class System {
  public:
   Processor& Cpu() { return cpu_; };
-  std::vector<Process>& Processes() { return processes_; };
+  std::vector<Process>& Processes();
   float MemoryUtilization() const { return LinuxParser::MemoryUtilization(); }
   long int UpTime() const { return LinuxParser::UpTime(); }
   int TotalProcesses() const { return LinuxParser::TotalProcesses(); }
@@ -21,7 +21,6 @@ class System {
     return LinuxParser::OperatingSystem();
   };
 
-  // TODO: Define any necessary private members
  private:
   Processor cpu_ = {};
   std::vector<Process> processes_ = {};

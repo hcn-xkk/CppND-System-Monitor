@@ -1,6 +1,6 @@
 #include "processor.h"
 
-// TODO: Return the aggregate CPU utilization
+// Return the aggregate CPU utilization
 float Processor::Utilization() {
   auto s_list = LinuxParser::CpuUtilization();
   std::vector<float> list;

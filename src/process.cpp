@@ -1,33 +1,63 @@
 #include "process.h"
 #include <unistd.h>
 #include <cctype>
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <vector>
 
 using std::string;
 using std::to_string;
 using std::vector;
 
-// TODO: Return this process's ID
-int Process::Pid() { return 0; }
+Process::Process(int pid, int system_uptime)
+    : pid_(pid), system_uptime_(system_uptime){};
 
-// TODO: This is not the delta.
 // https://stackoverflow.com/questions/23367857/accurate-calculation-of-cpu-usage-given-in-percentage-in-linux
-float Process::CpuUtilization() {}
+float Process::CpuUtilization() const {
+  std::ifstream filestream(LinuxParser::kProcDirectory + "/" +
+                           std::to_string(pid_) + LinuxParser::kStatFilename);
+  string line;
+  string key;
+  string value;
+  std::vector<string> values;
+  int i = 0;
+  if (filestream.is_open()) {
+    while (std::getline(filestream, line, ' ')) {
+      if (!line.empty() && values.size() < 22) {
+        values.emplace_back(line);
+      }
+    }
+  }
+  if (values.empty()) {
+    failed_ = true;
+    return 0.0;
+  }
 
-// TODO: Return the command that generated this process
-string Process::Command() { return string(); }
+  float total_time = std::stol(values[13]) + std::stol(values[14]) +
+                     std::stol(values[15]) + std::stol(values[16]);
+  // Another equation. But with this one sometimes ratio > 1?
+  // float seconds =
+  //     float(system_uptime_) - std::stol(values[21]) / sysconf(_SC_CLK_TCK);
+  float seconds = float(system_uptime_);
+  float ratio = total_time / sysconf(_SC_CLK_TCK) / seconds;
+  if (ratio > 1) {
+    throw std::runtime_error("error");
+  }
+  return ratio;
+}
 
-// TODO: Return this process's memory utilization
-string Process::Ram() { return string(); }
+string Process::Command() const { return LinuxParser::Command(pid_); }
 
-// TODO: Return the user (name) that generated this process
-string Process::User() { return string(); }
+string Process::Ram() const {
+  int ram_kb = stoi(LinuxParser::Ram(pid_));
+  int ram_mb = ram_kb / 1024;
+  return std::to_string(ram_mb);
+}
 
-// TODO: Return the age of this process (in seconds)
-long int Process::UpTime() { return 0; }
+string Process::User() const { return LinuxParser::User(pid_); }
 
-// TODO: Overload the "less than" comparison operator for Process objects
-// REMOVE: [[maybe_unused]] once you define the function
-bool Process::operator<(Process const& a[[maybe_unused]]) const { return true; }
+long int Process::UpTime() const { return LinuxParser::UpTime(pid_); }
+
+bool Process::operator<(Process const& a) const {
+  return CpuUtilization() > a.CpuUtilization();
+}
